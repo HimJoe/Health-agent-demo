@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Health Agent - Basic Demo</title>
+    <title>AI Health Agent - Fixed Demo</title>
     <style>
         * {
             margin: 0;
@@ -30,10 +30,23 @@
             color: white;
             padding: 20px;
             border-radius: 8px 8px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
         
         header h1 {
             font-size: 24px;
+        }
+        
+        .edit-profile-btn {
+            background-color: white;
+            color: #3498db;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
         }
         
         .main-section {
@@ -215,7 +228,8 @@
         }
         
         .form-group input,
-        .form-group select {
+        .form-group select,
+        .form-group textarea {
             width: 100%;
             padding: 8px;
             border: 1px solid #ddd;
@@ -292,12 +306,108 @@
             font-size: 12px;
             color: #666;
         }
+        
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 50px auto;
+            padding: 20px;
+            width: 80%;
+            max-width: 600px;
+            border-radius: 8px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .modal-title {
+            font-size: 20px;
+            color: #3498db;
+        }
+        
+        .close-modal {
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+        }
+        
+        .tab-container {
+            margin-bottom: 20px;
+        }
+        
+        .tab-nav {
+            display: flex;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 15px;
+        }
+        
+        .tab-button {
+            padding: 8px 15px;
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+        }
+        
+        .tab-button.active {
+            border-bottom-color: #3498db;
+            color: #3498db;
+            font-weight: bold;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* Add condition/medication row */
+        .add-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .add-row input {
+            flex-grow: 1;
+        }
+        
+        .add-row button {
+            padding: 8px 12px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
             <h1>AI Health Agent for Personalized Health Management</h1>
+            <button class="edit-profile-btn" id="edit-profile-btn">Edit Profile</button>
         </header>
         
         <div class="main-section">
@@ -458,8 +568,90 @@
             </div>
         </div>
     </div>
+    
+    <!-- Profile Edit Modal -->
+    <div id="profile-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Edit Your Health Profile</h2>
+                <span class="close-modal" id="close-profile-modal">&times;</span>
+            </div>
+            
+            <div class="tab-container">
+                <div class="tab-nav">
+                    <button class="tab-button active" data-tab="personal-tab">Personal Info</button>
+                    <button class="tab-button" data-tab="conditions-tab">Health Conditions</button>
+                    <button class="tab-button" data-tab="medications-tab">Medications</button>
+                </div>
+                
+                <!-- Personal Info Tab -->
+                <div id="personal-tab" class="tab-content active">
+                    <div class="form-group">
+                        <label for="edit-age">Age:</label>
+                        <input type="number" id="edit-age" min="0" max="120">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-gender">Gender:</label>
+                        <select id="edit-gender">
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Non-binary">Non-binary</option>
+                            <option value="Prefer not to say">Prefer not to say</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-height">Height (cm):</label>
+                        <input type="number" id="edit-height" min="0" max="300">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-weight">Weight (kg):</label>
+                        <input type="number" id="edit-weight" min="0" max="500" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-activity">Activity Level:</label>
+                        <select id="edit-activity">
+                            <option value="Sedentary">Sedentary</option>
+                            <option value="Lightly active">Lightly active</option>
+                            <option value="Moderate">Moderate</option>
+                            <option value="Very active">Very active</option>
+                            <option value="Extremely active">Extremely active</option>
+                        </select>
+                    </div>
+                    <div class="form-buttons">
+                        <button class="form-btn submit-btn" id="save-personal-btn">Save Changes</button>
+                    </div>
+                </div>
+                
+                <!-- Health Conditions Tab -->
+                <div id="conditions-tab" class="tab-content">
+                    <div id="conditions-list">
+                        <!-- Existing conditions will be displayed here -->
+                    </div>
+                    <div class="add-row">
+                        <input type="text" id="new-condition" placeholder="Condition name">
+                        <input type="text" id="condition-date" placeholder="Diagnosis date (e.g., June 2023)">
+                        <button id="add-condition-btn">Add</button>
+                    </div>
+                </div>
+                
+                <!-- Medications Tab -->
+                <div id="medications-tab" class="tab-content">
+                    <div id="medications-list">
+                        <!-- Existing medications will be displayed here -->
+                    </div>
+                    <div class="add-row">
+                        <input type="text" id="new-medication" placeholder="Medication name">
+                        <input type="text" id="medication-dosage" placeholder="Dosage (e.g., 10mg)">
+                        <input type="text" id="medication-frequency" placeholder="Frequency (e.g., daily)">
+                        <button id="add-medication-btn">Add</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script>
+    document.addEventListener('DOMContentLoaded', function() {
         // Get DOM elements
         const chatMessages = document.getElementById('chat-messages');
         const messageInput = document.getElementById('message-input');
@@ -472,10 +664,22 @@
         const cancelButton = document.getElementById('cancel-btn');
         const submitButton = document.getElementById('submit-btn');
         
+        // Profile edit elements
+        const editProfileBtn = document.getElementById('edit-profile-btn');
+        const profileModal = document.getElementById('profile-modal');
+        const closeProfileModal = document.getElementById('close-profile-modal');
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const savePersonalBtn = document.getElementById('save-personal-btn');
+        const addConditionBtn = document.getElementById('add-condition-btn');
+        const addMedicationBtn = document.getElementById('add-medication-btn');
+        
         // Data form input sections
         const sleepInputs = document.getElementById('sleep-inputs');
         const activityInputs = document.getElementById('activity-inputs');
         const bpInputs = document.getElementById('bp-inputs');
+        
+        // Initialize the profile editor
+        initProfileEditor();
         
         // Add event listeners
         sendButton.addEventListener('click', sendMessage);
@@ -521,6 +725,41 @@
         
         submitButton.addEventListener('click', saveHealthData);
         
+        // Profile edit events
+        editProfileBtn.addEventListener('click', function() {
+            profileModal.style.display = 'block';
+            loadCurrentProfile();
+        });
+        
+        closeProfileModal.addEventListener('click', function() {
+            profileModal.style.display = 'none';
+        });
+        
+        tabButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                // Hide all tabs
+                document.querySelectorAll('.tab-content').forEach(tab => {
+                    tab.classList.remove('active');
+                });
+                
+                // Deactivate all buttons
+                tabButtons.forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                
+                // Show selected tab
+                const tabId = this.getAttribute('data-tab');
+                document.getElementById(tabId).classList.add('active');
+                
+                // Activate this button
+                this.classList.add('active');
+            });
+        });
+        
+        savePersonalBtn.addEventListener('click', savePersonalInfo);
+        addConditionBtn.addEventListener('click', addCondition);
+        addMedicationBtn.addEventListener('click', addMedication);
+        
         // Functions
         function sendMessage() {
             const message = messageInput.value.trim();
@@ -545,55 +784,6 @@
             const content = document.createElement('div');
             content.textContent = text;
             messageDiv.appendChild(content);
-            
-            const time = document.createElement('div');
-            time.className = 'message-time';
-            const now = new Date();
-            time.textContent = `${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`;
-            messageDiv.appendChild(time);
-            
-            chatMessages.appendChild(messageDiv);
-            
-            // Scroll to bottom
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
-        
-        function generateResponse(userMessage) {
-            // Keyword-based responses
-            let response = '';
-            let source = '';
-            
-            if (userMessage.toLowerCase().includes('sleep') || userMessage.toLowerCase().includes('tired') || userMessage.toLowerCase().includes('fatigue')) {
-                response = "Looking at your sleep patterns, I see you've been averaging about 6.5 hours with 'fair' quality. For someone with mild hypertension, quality sleep is particularly important.\n\nSome personalized recommendations:\n1. Maintain a consistent sleep schedule (even on weekends)\n2. Consider taking your Lisinopril in the morning rather than evening, as it can sometimes affect sleep\n3. Your activity level is good (8,750 steps yesterday), but try to complete exercise at least 3-4 hours before bedtime\n4. Create a calming pre-sleep routine without screens\n5. Your low sodium dietary preference is excellent for hypertension and can also help reduce nighttime awakenings";
-                source = "National Sleep Foundation, 2024; American Heart Association, 2023";
-            }
-            else if (userMessage.toLowerCase().includes('blood pressure') || userMessage.toLowerCase().includes('hypertension')) {
-                response = "Your recent blood pressure reading of 132/84 shows mild elevation. For someone with your profile, here are targeted recommendations:\n\n1. Continue your prescribed Lisinopril (10mg daily)\n2. Maintain your low-sodium diet approach - this is excellent for managing hypertension\n3. Your current activity level (moderate with ~8,750 steps) is beneficial; aim for consistency with 30+ minutes of activity daily\n4. Consider incorporating stress management techniques like deep breathing or meditation\n5. Work on improving sleep quality, as your recent average of 6.5 hours is below optimal and can impact blood pressure";
-                source = "American Heart Association Guidelines, 2023; American College of Cardiology, 2024";
-            }
-            else if (userMessage.toLowerCase().includes('exercise') || userMessage.toLowerCase().includes('activity')) {
-                response = "Based on your profile showing moderate activity level and recent logs averaging 8,750 steps and 42 active minutes daily, you're doing well with physical activity.\n\nFor someone with mild hypertension, your current activity pattern is beneficial. Some personalized suggestions:\n\n1. Maintain your current step count while gradually working toward 10,000 steps\n2. Consider adding 2 days of strength training weekly, which has specific benefits for blood pressure management\n3. Your walking routine is excellent - adding brief intervals of increased pace can enhance cardiovascular benefits\n4. Monitor your blood pressure before and after exercise occasionally to understand your body's response";
-                source = "World Health Organization Physical Activity Guidelines, 2023; American Heart Association, 2023";
-            }
-            else {
-                response = "Based on your health profile with mild hypertension and seasonal allergies, I can provide personalized guidance on several aspects of your health:\n\n- Managing your blood pressure (currently 132/84)\n- Improving your sleep quality (currently averaging 6.5 hours)\n- Optimizing your exercise routine\n- Addressing seasonal allergies\n\nIs there a specific area you'd like me to focus on?";
-                source = "";
-            }
-            
-            // Add agent message
-            const messageDiv = document.createElement('div');
-            messageDiv.className = 'message agent-message';
-            
-            const content = document.createElement('div');
-            content.textContent = response;
-            messageDiv.appendChild(content);
-            
-            if (source) {
-                const sourceInfo = document.createElement('div');
-                sourceInfo.className = 'source-info';
-                sourceInfo.textContent = `Source: ${source}`;
-                messageDiv.appendChild(sourceInfo);
-            }
             
             const time = document.createElement('div');
             time.className = 'message-time';
@@ -655,21 +845,7 @@
             
             if (message) {
                 // Add confirmation message to chat
-                const messageDiv = document.createElement('div');
-                messageDiv.className = 'message agent-message';
-                
-                const content = document.createElement('div');
-                content.textContent = message;
-                messageDiv.appendChild(content);
-                
-                const time = document.createElement('div');
-                time.className = 'message-time';
-                const now = new Date();
-                time.textContent = `${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`;
-                messageDiv.appendChild(time);
-                
-                chatMessages.appendChild(messageDiv);
-                chatMessages.scrollTop = chatMessages.scrollHeight;
+                addAgentMessage(message);
                 
                 // Hide form
                 dataForm.style.display = 'none';
@@ -722,6 +898,320 @@
             chatMessages.appendChild(visualizationDiv);
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }
+        
+        // Profile editor functions
+        function initProfileEditor() {
+            // Initialize the conditions list
+            updateConditionsList();
+            
+            // Initialize the medications list
+            updateMedicationsList();
+            
+            // Close modal when clicking outside of it
+            window.onclick = function(event) {
+                if (event.target === profileModal) {
+                    profileModal.style.display = "none";
+                }
+            };
+        }
+        
+        function loadCurrentProfile() {
+            // Load personal info
+            document.getElementById('edit-age').value = document.getElementById('user-age').textContent;
+            
+            const genderSelect = document.getElementById('edit-gender');
+            const currentGender = document.getElementById('user-gender').textContent;
+            for (let i = 0; i < genderSelect.options.length; i++) {
+                if (genderSelect.options[i].value === currentGender) {
+                    genderSelect.selectedIndex = i;
+                    break;
+                }
+            }
+            
+            document.getElementById('edit-height').value = document.getElementById('user-height').textContent.replace(' cm', '');
+            document.getElementById('edit-weight').value = document.getElementById('user-weight').textContent.replace(' kg', '');
+            
+            const activitySelect = document.getElementById('edit-activity');
+            const currentActivity = document.getElementById('user-activity').textContent;
+            for (let i = 0; i < activitySelect.options.length; i++) {
+                if (activitySelect.options[i].value === currentActivity) {
+                    activitySelect.selectedIndex = i;
+                    break;
+                }
+            }
+        }
+        
+        function savePersonalInfo() {
+            // Get form values
+            const age = document.getElementById('edit-age').value;
+            const gender = document.getElementById('edit-gender').value;
+            const height = document.getElementById('edit-height').value;
+            const weight = document.getElementById('edit-weight').value;
+            const activity = document.getElementById('edit-activity').value;
+            
+            // Update profile display
+            if (age) document.getElementById('user-age').textContent = age;
+            if (gender) document.getElementById('user-gender').textContent = gender;
+            if (height) document.getElementById('user-height').textContent = height + ' cm';
+            if (weight) document.getElementById('user-weight').textContent = weight + ' kg';
+            if (activity) document.getElementById('user-activity').textContent = activity;
+            
+            // Display confirmation message
+            const message = "I've updated your personal information. This helps me provide more personalized health recommendations based on your age, gender, body measurements, and activity level.";
+            addAgentMessage(message);
+            
+            // Close modal
+            profileModal.style.display = "none";
+        }
+        
+        function updateConditionsList() {
+            const container = document.getElementById('conditions-list');
+            container.innerHTML = ''; // Clear existing content
+            
+            // Get all conditions from the sidebar
+            const conditions = document.getElementById('health-conditions').querySelectorAll('.health-item');
+            
+            // Create display for each condition with delete button
+            conditions.forEach((condition, index) => {
+                const conditionName = condition.querySelector('span:first-child').textContent;
+                const conditionDate = condition.querySelector('span:last-child').textContent;
+                
+                const conditionItem = document.createElement('div');
+                conditionItem.className = 'health-item';
+                conditionItem.style.display = 'flex';
+                conditionItem.style.justifyContent = 'space-between';
+                conditionItem.style.alignItems = 'center';
+                conditionItem.style.marginBottom = '10px';
+                
+                const conditionInfo = document.createElement('div');
+                conditionInfo.innerHTML = `<strong>${conditionName}</strong> (${conditionDate})`;
+                
+                const deleteButton = document.createElement('button');
+                deleteButton.textContent = 'Remove';
+                deleteButton.style.padding = '4px 8px';
+                deleteButton.style.backgroundColor = '#e74c3c';
+                deleteButton.style.color = 'white';
+                deleteButton.style.border = 'none';
+                deleteButton.style.borderRadius = '4px';
+                deleteButton.style.cursor = 'pointer';
+                
+                deleteButton.addEventListener('click', function() {
+                    // Remove from main display
+                    document.getElementById('health-conditions').children[index].remove();
+                    
+                    // Update the editor list
+                    updateConditionsList();
+                    
+                    // Confirm removal in chat
+                    const message = `I've removed ${conditionName} from your health profile. Let me know if you want to add any other health conditions.`;
+                    addAgentMessage(message);
+                });
+                
+                conditionItem.appendChild(conditionInfo);
+                conditionItem.appendChild(deleteButton);
+                container.appendChild(conditionItem);
+            });
+        }
+        
+        function addCondition() {
+            const conditionName = document.getElementById('new-condition').value.trim();
+            const conditionDate = document.getElementById('condition-date').value.trim() || 'Unknown date';
+            
+            if (!conditionName) return;
+            
+            // Create condition item
+            const conditionItem = document.createElement('div');
+            conditionItem.className = 'health-item';
+            
+            const nameSpan = document.createElement('span');
+            nameSpan.textContent = conditionName;
+            
+            const dateSpan = document.createElement('span');
+            dateSpan.textContent = conditionDate;
+            
+            conditionItem.appendChild(nameSpan);
+            conditionItem.appendChild(dateSpan);
+            
+            // Add to profile
+            document.getElementById('health-conditions').appendChild(conditionItem);
+            
+            // Update editor list
+            updateConditionsList();
+            
+            // Clear input fields
+            document.getElementById('new-condition').value = '';
+            document.getElementById('condition-date').value = '';
+            
+            // Add confirmation to chat
+            const message = `I've added ${conditionName} to your health profile. This will help me provide recommendations that consider this condition.`;
+            addAgentMessage(message);
+        }
+        
+        function updateMedicationsList() {
+            const container = document.getElementById('medications-list');
+            container.innerHTML = ''; // Clear existing content
+            
+            // Get all medications from the sidebar
+            const medications = document.getElementById('medications').querySelectorAll('.health-item');
+            
+            // Create display for each medication with delete button
+            medications.forEach((medication, index) => {
+                const medicationName = medication.querySelector('span:first-child').textContent;
+                const medicationDetails = medication.querySelector('span:last-child').textContent;
+                
+                const medicationItem = document.createElement('div');
+                medicationItem.className = 'health-item';
+                medicationItem.style.display = 'flex';
+                medicationItem.style.justifyContent = 'space-between';
+                medicationItem.style.alignItems = 'center';
+                medicationItem.style.marginBottom = '10px';
+                
+                const medicationInfo = document.createElement('div');
+                medicationInfo.innerHTML = `<strong>${medicationName}</strong> (${medicationDetails})`;
+                
+                const deleteButton = document.createElement('button');
+                deleteButton.textContent = 'Remove';
+                deleteButton.style.padding = '4px 8px';
+                deleteButton.style.backgroundColor = '#e74c3c';
+                deleteButton.style.color = 'white';
+                deleteButton.style.border = 'none';
+                deleteButton.style.borderRadius = '4px';
+                deleteButton.style.cursor = 'pointer';
+                
+                deleteButton.addEventListener('click', function() {
+                    // Remove from main display
+                    document.getElementById('medications').children[index].remove();
+                    
+                    // Update the editor list
+                    updateMedicationsList();
+                    
+                    // Confirm removal in chat
+                    const message = `I've removed ${medicationName} from your medication list. Let me know if you need to add any other medications or have questions about your current treatment plan.`;
+                    addAgentMessage(message);
+                });
+                
+                medicationItem.appendChild(medicationInfo);
+                medicationItem.appendChild(deleteButton);
+                container.appendChild(medicationItem);
+            });
+        }
+        
+        function addMedication() {
+            const medicationName = document.getElementById('new-medication').value.trim();
+            const dosage = document.getElementById('medication-dosage').value.trim();
+            const frequency = document.getElementById('medication-frequency').value.trim();
+            
+            if (!medicationName) return;
+            
+            // Format details
+            const details = [];
+            if (dosage) details.push(dosage);
+            if (frequency) details.push(frequency);
+            const detailsText = details.join(', ') || 'No details provided';
+            
+            // Create medication item
+            const medicationItem = document.createElement('div');
+            medicationItem.className = 'health-item';
+            
+            const nameSpan = document.createElement('span');
+            nameSpan.textContent = medicationName;
+            
+            const detailsSpan = document.createElement('span');
+            detailsSpan.textContent = detailsText;
+            
+            medicationItem.appendChild(nameSpan);
+            medicationItem.appendChild(detailsSpan);
+            
+            // Add to profile
+            document.getElementById('medications').appendChild(medicationItem);
+            
+            // Update editor list
+            updateMedicationsList();
+            
+            // Clear input fields
+            document.getElementById('new-medication').value = '';
+            document.getElementById('medication-dosage').value = '';
+            document.getElementById('medication-frequency').value = '';
+            
+            // Add confirmation to chat
+            const message = `I've added ${medicationName} to your medication list. This will help me consider potential medication effects when providing health recommendations.`;
+            addAgentMessage(message);
+        }
+        
+        function addAgentMessage(content, source = '') {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message agent-message';
+            
+            const contentElem = document.createElement('div');
+            contentElem.textContent = content;
+            messageDiv.appendChild(contentElem);
+            
+            if (source) {
+                const sourceInfo = document.createElement('div');
+                sourceInfo.className = 'source-info';
+                sourceInfo.textContent = `Source: ${source}`;
+                messageDiv.appendChild(sourceInfo);
+            }
+            
+            const time = document.createElement('div');
+            time.className = 'message-time';
+            const now = new Date();
+            time.textContent = `${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`;
+            messageDiv.appendChild(time);
+            
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+    });
     </script>
 </body>
 </html>
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        function generateResponse(userMessage) {
+            // Keyword-based responses
+            let response = '';
+            let source = '';
+            
+            if (userMessage.toLowerCase().includes('sleep') || userMessage.toLowerCase().includes('tired') || userMessage.toLowerCase().includes('fatigue')) {
+                response = "Looking at your sleep patterns, I see you've been averaging about 6.5 hours with 'fair' quality. For someone with mild hypertension, quality sleep is particularly important.\n\nSome personalized recommendations:\n1. Maintain a consistent sleep schedule (even on weekends)\n2. Consider taking your Lisinopril in the morning rather than evening, as it can sometimes affect sleep\n3. Your activity level is good (8,750 steps yesterday), but try to complete exercise at least 3-4 hours before bedtime\n4. Create a calming pre-sleep routine without screens\n5. Your low sodium dietary preference is excellent for hypertension and can also help reduce nighttime awakenings";
+                source = "National Sleep Foundation, 2024; American Heart Association, 2023";
+            }
+            else if (userMessage.toLowerCase().includes('blood pressure') || userMessage.toLowerCase().includes('hypertension')) {
+                response = "Your recent blood pressure reading of 132/84 shows mild elevation. For someone with your profile, here are targeted recommendations:\n\n1. Continue your prescribed Lisinopril (10mg daily)\n2. Maintain your low-sodium diet approach - this is excellent for managing hypertension\n3. Your current activity level (moderate with ~8,750 steps) is beneficial; aim for consistency with 30+ minutes of activity daily\n4. Consider incorporating stress management techniques like deep breathing or meditation\n5. Work on improving sleep quality, as your recent average of 6.5 hours is below optimal and can impact blood pressure";
+                source = "American Heart Association Guidelines, 2023; American College of Cardiology, 2024";
+            }
+            else if (userMessage.toLowerCase().includes('exercise') || userMessage.toLowerCase().includes('activity')) {
+                response = "Based on your profile showing moderate activity level and recent logs averaging 8,750 steps and 42 active minutes daily, you're doing well with physical activity.\n\nFor someone with mild hypertension, your current activity pattern is beneficial. Some personalized suggestions:\n\n1. Maintain your current step count while gradually working toward 10,000 steps\n2. Consider adding 2 days of strength training weekly, which has specific benefits for blood pressure management\n3. Your walking routine is excellent - adding brief intervals of increased pace can enhance cardiovascular benefits\n4. Monitor your blood pressure before and after exercise occasionally to understand your body's response";
+                source = "World Health Organization Physical Activity Guidelines, 2023; American Heart Association, 2023";
+            }
+            else {
+                response = "Based on your health profile with mild hypertension and seasonal allergies, I can provide personalized guidance on several aspects of your health:\n\n- Managing your blood pressure (currently 132/84)\n- Improving your sleep quality (currently averaging 6.5 hours)\n- Optimizing your exercise routine\n- Addressing seasonal allergies\n\nIs there a specific area you'd like me to focus on?";
+                source = "";
+            }
+            
+            // Add agent message
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message agent-message';
+            
+            const content = document.createElement('div');
+            content.textContent = response;
+            messageDiv.appendChild(content);
+            
+            if (source) {
+                const sourceInfo = document.createElement('div');
+                sourceInfo.className = 'source-info';
+                sourceInfo.textContent = `Source: ${source}`;
+                messageDiv.appendChild(sourceInfo);
+            }
+            
+            const time = document.createElement('div');
+            time.className = 'message-time';
+            const now = new Date();
+            time.textContent = `${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`;
+            messageDiv.appendChild(time);
+            
+            chatMessages.appendChild(messageDiv);
+            
+            // Scroll to bottom
