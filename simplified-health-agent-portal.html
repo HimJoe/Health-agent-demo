@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Health Agent - Simplified Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        header {
+            background-color: #3498db;
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        header h1 {
+            font-size: 24px;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .user-select {
+            padding: 8px;
+            border-radius: 4px;
+            border: none;
+        }
+        
+        .main-section {
+            display: flex;
+            height: 600px;
+        }
+        
+        .sidebar {
+            width: 300px;
+            padding: 20px;
+            border-right: 1px solid #eee;
+            overflow-y: auto;
+        }
+        
+        .chat-section {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .section-title {
+            font-size: 18px;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #eee;
+            color: #3498db;
+        }
+        
+        .info-group {
+            margin-bottom: 20px;
+        }
+        
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+        
+        .info-label {
+            font-weight: bold;
+            color: #666;
+        }
+        
+        .health-item {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .chat-messages {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        .message {
+            margin-bottom: 15px;
+            max-width: 80%;
+            padding: 10px 15px;
+            border-radius: 8px;
+        }
+        
+        .agent-message {
+            background-color: #f1f1f1;
+            margin-right: auto;
+        }
+        
+        .user-message {
+            background-color: #3498db;
+            color: white;
+            margin-left: auto;
+        }
+        
+        .message-time {
+            font-size: 12px;
+            opacity: 0.7;
+            margin-top: 5px;
+        }
+        
+        .source-info {
+            font-size: 12px;
+            font-style: italic;
+            color: #3498db;
+            margin-top: 5px;
+        }
+        
+        .chat-input {
+            display: flex;
+            padding: 10px;
+            border-top: 1px solid #eee;
+        }
+        
+        .chat-input input {
+            flex-grow: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-right: 10px;
+        }
+        
+        .chat-input button {
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .suggestions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 10px;
+            border-top: 1px solid #eee;
+        }
+        
+        .suggestion-btn {
+            background-color: #f1f1f1;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            padding: 8px 12px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        
+        .actions {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 20px;
+            border-top: 1px solid #eee;
+        }
+        
+        .action-btn {
+            padding: 8px 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+            cursor: pointer;
+        }
+        
+        .visualization {
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+        }
+        
+        .chart-container {
+            margin-top: 10px;
+            height: 200px;
+            position: relative;
+        }
+        
+        .chart-bar {
+            position: absolute;
+            bottom: 0;
+            width: 30px;
+            background-color: #3498db;
+            border-radius: 3px 3px 0 0;
+        }
+        
+        .chart-date {
+            position: absolute;
+            bottom: -25px;
+            font-size: 12px;
+            text-align: center;
+            width: 40px;
+            margin-left: -5px;
+        }
+        
+        .chart-value {
+            position: absolute;
+            bottom: -40px;
+            font-size: 12px;
+            text-align: center;
+            width: 40px;
+            margin-left: -5px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>AI Health Agent for Personalized Health Management</h1>
+            <div class="user-info">
+                <select class="user-select" id="userSelect">
+                    <option value="user123">User123</option>
+                    <option value="demo_user">Demo User</option>
+                    <option value="test_user">Test User</option>
+                </select>
+            </div>
+        </header>
+        
+        <div class="main-section">
+            <aside class="sidebar">
+                <div class="info-group">
+                    <h2 class="section-title">Personal Information</h2>
+                    <div class="info-row">
+                        <span class="info-label">Age:</span>
+                        <span>42</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Gender:</span>
+                        <span>Female</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Height:</span>
+                        <span>165 cm</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Weight:</span>
+                        <span>68 kg</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Activity Level:</span>
+                        <span>Moderate</span>
+                    </div>
+                </div>
+                
+                <div class="info-group">
+                    <h2 class="section-title">Health Conditions</h2>
+                    <div class="health-item">
+                        <span>Mild hypertension</span>
+                        <span>June 2023</span>
+                    </div>
+                    <div class="health-item">
+                        <span>Seasonal allergies</span>
+                        <span>March 2020</span>
+                    </div>
+                </div>
+                
+                <div class="info-group">
+                    <h2 class="section-title">Medications</h2>
+                    <div class="health-item">
+                        <span>Lisinopril</span>
+                        <span>10mg, daily</span>
+                    </div>
+                    <div class="health-item">
+                        <span>Loratadine</span>
+                        <span>10mg, as needed</span>
+                    </div>
+                </div>
+                
+                <div class="info-group">
+                    <h2 class="section-title">Recent Health Metrics</h2>
+                    <div class="info-row">
+                        <span class="info-label">Sleep (Apr 17):</span>
+                        <span>6.5 hrs, fair quality</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Activity (Apr 17):</span>
+                        <span>8,750 steps, 42 min</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Vitals (Apr 17):</span>
+                        <span>BP: 132/84, HR: 72</span>
+                    </div>
+                </div>
+            </aside>
+            
+            <div class="chat-section">
+                <div class="chat-messages" id="chatMessages">
+                    <div class="message agent-message">
+                        <div>Welcome to your AI Health Agent! I'm here to provide personalized health recommendations based on your profile and needs. How can I assist you today?</div>
+                        <div class="message-time">10:30 AM</div>
+                    </div>
+                </div>
+                
+                <div class="suggestions" id="suggestionArea">
+                    <button class="suggestion-btn">How can I improve my sleep quality?</button>
+                    <button class="suggestion-btn">What might be causing my fatigue lately?</button>
+                    <button class="suggestion-btn">How can I better manage my hypertension?</button>
+                    <button class="suggestion-btn">Should I adjust my exercise routine?</button>
+                </div>
+                
+                <div class="chat-input">
+                    <input type="text" id="messageInput" placeholder="Type your health question here...">
+                    <button id="sendButton">Send</button>
+                </div>
+                
+                <div class="actions">
+                    <button class="action-btn" id="healthDataBtn">Add Health Data</button>
+                    <button class="action-btn" id="visualizeBtn">Show Health Trends</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Get DOM elements
+        const chatMessages = document.getElementById('chatMessages');
+        const messageInput = document.getElementById('messageInput');
+        const sendButton = document.getElementById('sendButton');
+        const suggestionButtons = document.querySelectorAll('.suggestion-btn');
+        const visualizeBtn = document.getElementById('visualizeBtn');
+        const healthDataBtn = document.getElementById('healthDataBtn');
+        
+        // Add event listeners
+        sendButton.addEventListener('click', sendMessage);
+        messageInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+        
+        suggestionButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                messageInput.value = this.textContent;
+                sendMessage();
+            });
+        });
+        
+        visualizeBtn.addEventListener('click', showVisualization);
+        healthDataBtn.addEventListener('click', function() {
+            alert("In a full implementation, this would open a form to add new health metrics like sleep, activity, and vital signs.");
+        });
+        
+        // Functions
+        function sendMessage() {
+            const message = messageInput.value.trim();
+            if (message === '') return;
+            
+            // Add user message
+            const userMessageElement = document.createElement('div');
+            userMessageElement.className = 'message user-message';
+            
+            const messageText = document.createElement('div');
+            messageText.textContent = message;
+            userMessageElement.appendChild(messageText);
+            
+            const messageTime = document.createElement('div');
+            messageTime.className = 'message-time';
+            const now = new Date();
+            messageTime.textContent = `${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`;
+            userMessageElement.appendChild(messageTime);
+            
+            chatMessages.appendChild(userMessageElement);
+            
+            // Clear input
+            messageInput.value = '';
+            
+            // Scroll to bottom
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            // Generate response after short delay
+            setTimeout(function() {
+                generateResponse(message);
+            }, 1000);
+        }
+        
+        function generateResponse(userMessage) {
+            // Simple keyword-based responses
+            let response = '';
+            let source = '';
+            
+            if (userMessage.toLowerCase().includes('sleep') || userMessage.toLowerCase().includes('tired') || userMessage.toLowerCase().includes('fatigue')) {
+                response = "Looking at your sleep patterns, I see you've been averaging about 6.5 hours with 'fair' quality. For someone with mild hypertension, quality sleep is particularly important.\n\nSome personalized recommendations:\n1. Maintain a consistent sleep schedule (even on weekends)\n2. Consider taking your Lisinopril in the morning rather than evening, as it can sometimes affect sleep\n3. Your activity level is good (8,750 steps yesterday), but try to complete exercise at least 3-4 hours before bedtime\n4. Create a calming pre-sleep routine without screens\n5. Your low sodium dietary preference is excellent for hypertension and can also help reduce nighttime awakenings";
+                source = "National Sleep Foundation, 2024; American Heart Association, 2023";
+            }
+            else if (userMessage.toLowerCase().includes('blood pressure') || userMessage.toLowerCase().includes('hypertension')) {
+                response = "Your recent blood pressure reading of 132/84 shows mild elevation. For someone with your profile, here are targeted recommendations:\n\n1. Continue your prescribed Lisinopril (10mg daily)\n2. Maintain your low-sodium diet approach - this is excellent for managing hypertension\n3. Your current activity level (moderate with ~8,750 steps) is beneficial; aim for consistency with 30+ minutes of activity daily\n4. Consider incorporating stress management techniques like deep breathing or meditation\n5. Work on improving sleep quality, as your recent average of 6.5 hours is below optimal and can impact blood pressure";
+                source = "American Heart Association Guidelines, 2023; American College of Cardiology, 2024";
+            }
+            else if (userMessage.toLowerCase().includes('exercise') || userMessage.toLowerCase().includes('activity')) {
+                response = "Based on your profile showing moderate activity level and recent logs averaging 8,750 steps and 42 active minutes daily, you're doing well with physical activity.\n\nFor someone with mild hypertension, your current activity pattern is beneficial. Some personalized suggestions:\n\n1. Maintain your current step count while gradually working toward 10,000 steps\n2. Consider adding 2 days of strength training weekly, which has specific benefits for blood pressure management\n3. Your walking routine is excellent - adding brief intervals of increased pace can enhance cardiovascular benefits\n4. Monitor your blood pressure before and after exercise occasionally to understand your body's response";
+                source = "World Health Organization Physical Activity Guidelines, 2023; American Heart Association, 2023";
+            }
+            else {
+                response = "Based on your health profile with mild hypertension and seasonal allergies, I can provide personalized guidance on several aspects of your health:\n\n- Managing your blood pressure (currently 132/84)\n- Improving your sleep quality (currently averaging 6.5 hours)\n- Optimizing your exercise routine\n- Addressing seasonal allergies\n\nIs there a specific area you'd like me to focus on?";
+                source = "";
+            }
+            
+            // Add agent message
+            const agentMessageElement = document.createElement('div');
+            agentMessageElement.className = 'message agent-message';
+            
+            const messageText = document.createElement('div');
+            messageText.textContent = response;
+            agentMessageElement.appendChild(messageText);
+            
+            if (source) {
+                const sourceInfo = document.createElement('div');
+                sourceInfo.className = 'source-info';
+                sourceInfo.textContent = `Source: ${source}`;
+                agentMessageElement.appendChild(sourceInfo);
+            }
+            
+            const messageTime = document.createElement('div');
+            messageTime.className = 'message-time';
+            const now = new Date();
+            messageTime.textContent = `${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`;
+            agentMessageElement.appendChild(messageTime);
+            
+            chatMessages.appendChild(agentMessageElement);
+            
+            // Scroll to bottom
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        function showVisualization() {
+            // Create visualization message
+            const visualizationMsg = document.createElement('div');
+            visualizationMsg.className = 'message agent-message';
+            
+            const messageContent = document.createElement('div');
+            
+            // Add title and explanation
+            messageContent.innerHTML = '<div>Here\'s a visualization of your recent blood pressure readings:</div>';
+            
+            // Create visualization
+            const visualization = document.createElement('div');
+            visualization.className = 'visualization';
+            
+            // BP chart
+            const chartTitle = document.createElement('h3');
+            chartTitle.textContent = 'Blood Pressure Trend';
+            chartTitle.style.marginBottom = '10px';
+            visualization.appendChild(chartTitle);
+            
+            const chartContainer = document.createElement('div');
+            chartContainer.className = 'chart-container';
+            chartContainer.style.marginBottom = '40px';
+            
+            // BP data
+            const bpData = [
+                { date: 'Apr 13', value: 135, height: 85 },
+                { date: 'Apr 15', value: 128, height: 78 },
+                { date: 'Apr 17', value: 132, height: 82 }
+            ];
+            
+            // Create bars
+            bpData.forEach((data, index) => {
+                const position = 15 + (index * 80);
+                
+                const bar = document.createElement('div');
+                bar.className = 'chart-bar';
+                bar.style.left = `${position}px`;
+                bar.style.height = `${data.height}px`;
+                bar.style.backgroundColor = data.value > 130 ? '#ff9f80' : '#80b1ff';
+                
+                const dateLabel = document.createElement('div');
+                dateLabel.className = 'chart-date';
+                dateLabel.textContent = data.date;
+                dateLabel.style.left = `${position}px`;
+                
+                const valueLabel = document.createElement('div');
+                valueLabel.className = 'chart-value';
+                valueLabel.textContent = `${data.value}/` + (data.value - 50);
+                valueLabel.style.left = `${position}px`;
+                
+                chartContainer.appendChild(bar);
+                chartContainer.appendChild(dateLabel);
+                chartContainer.appendChild(valueLabel);
+            });
+            
+            visualization.appendChild(chartContainer);
+            
+            // Analysis
+            const analysis = document.createElement('div');
+            analysis.innerHTML = '<strong>Analysis:</strong> Your blood pressure has been fluctuating slightly, but remains in the mildly elevated range. The 132/84 reading on Apr 17 is an improvement from Apr 13, suggesting your medication and lifestyle adjustments are having a positive effect. Continue monitoring regularly and maintaining your current treatment plan.';
+            analysis.style.marginTop = '20px';
+            analysis.style.fontSize = '14px';
+            
+            visualization.appendChild(analysis);
+            messageContent.appendChild(visualization);
+            
+            // Source citation
+            const sourceInfo = document.createElement('div');
+            sourceInfo.className = 'source-info';
+            sourceInfo.textContent = 'Source: American Heart Association Guidelines, 2023';
+            
+            // Timestamp
+            const messageTime = document.createElement('div');
+            messageTime.className = 'message-time';
+            const now = new Date();
+            messageTime.textContent = `${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`;
+            
+            // Add all elements to message
+            visualizationMsg.appendChild(messageContent);
+            visualizationMsg.appendChild(sourceInfo);
+            visualizationMsg.appendChild(messageTime);
+            
+            // Add to chat and scroll
+            chatMessages.appendChild(visualizationMsg);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+    </script>
+</body>
+</html>
