@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Health Agent - Fixed Demo</title>
+    <title>AI Health Agent - Final Version</title>
     <style>
         * {
             margin: 0;
@@ -651,7 +651,7 @@
     </div>
 
     <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    (function() {
         // Get DOM elements
         const chatMessages = document.getElementById('chat-messages');
         const messageInput = document.getElementById('message-input');
@@ -678,21 +678,56 @@
         const activityInputs = document.getElementById('activity-inputs');
         const bpInputs = document.getElementById('bp-inputs');
         
-        // Initialize the profile editor
-        initProfileEditor();
-        
         // Add event listeners
-        sendButton.addEventListener('click', sendMessage);
+        sendButton.addEventListener('click', function() {
+            const message = messageInput.value.trim();
+            if (!message) return;
+            
+            // Add user message to chat
+            addMessageToChat(message, 'user');
+            
+            // Clear input
+            messageInput.value = '';
+            
+            // Generate agent response after a short delay
+            setTimeout(function() {
+                generateResponse(message);
+            }, 800);
+        });
+        
         messageInput.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
-                sendMessage();
+                const message = messageInput.value.trim();
+                if (!message) return;
+                
+                // Add user message to chat
+                addMessageToChat(message, 'user');
+                
+                // Clear input
+                messageInput.value = '';
+                
+                // Generate agent response after a short delay
+                setTimeout(function() {
+                    generateResponse(message);
+                }, 800);
             }
         });
         
         suggestionButtons.forEach(button => {
             button.addEventListener('click', function() {
-                messageInput.value = this.textContent;
-                sendMessage();
+                const message = this.textContent.trim();
+                messageInput.value = message;
+                
+                // Add user message to chat
+                addMessageToChat(message, 'user');
+                
+                // Clear input
+                messageInput.value = '';
+                
+                // Generate agent response after a short delay
+                setTimeout(function() {
+                    generateResponse(message);
+                }, 800);
             });
         });
         
@@ -727,8 +762,8 @@
         
         // Profile edit events
         editProfileBtn.addEventListener('click', function() {
-            profileModal.style.display = 'block';
             loadCurrentProfile();
+            profileModal.style.display = 'block';
         });
         
         closeProfileModal.addEventListener('click', function() {
@@ -760,23 +795,10 @@
         addConditionBtn.addEventListener('click', addCondition);
         addMedicationBtn.addEventListener('click', addMedication);
         
-        // Functions
-        function sendMessage() {
-            const message = messageInput.value.trim();
-            if (!message) return;
-            
-            // Add user message to chat
-            addMessageToChat(message, 'user');
-            
-            // Clear input
-            messageInput.value = '';
-            
-            // Generate agent response after a short delay
-            setTimeout(() => {
-                generateResponse(message);
-            }, 800);
-        }
+        // Initialize
+        initProfileEditor();
         
+        // Functions
         function addMessageToChat(text, sender) {
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${sender}-message`;
@@ -794,6 +816,53 @@
             chatMessages.appendChild(messageDiv);
             
             // Scroll to bottom
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        function generateResponse(userMessage) {
+            // Keyword-based responses
+            let response = '';
+            let source = '';
+            
+            if (userMessage.toLowerCase().includes('sleep') || userMessage.toLowerCase().includes('tired') || userMessage.toLowerCase().includes('fatigue')) {
+                response = "Looking at your sleep patterns, I see you've been averaging about 6.5 hours with 'fair' quality. For someone with mild hypertension, quality sleep is particularly important.\n\nSome personalized recommendations:\n1. Maintain a consistent sleep schedule (even on weekends)\n2. Consider taking your Lisinopril in the morning rather than evening, as it can sometimes affect sleep\n3. Your activity level is good (8,750 steps yesterday), but try to complete exercise at least 3-4 hours before bedtime\n4. Create a calming pre-sleep routine without screens\n5. Your low sodium dietary preference is excellent for hypertension and can also help reduce nighttime awakenings";
+                source = "National Sleep Foundation, 2024; American Heart Association, 2023";
+            }
+            else if (userMessage.toLowerCase().includes('blood pressure') || userMessage.toLowerCase().includes('hypertension')) {
+                response = "Your recent blood pressure reading of 132/84 shows mild elevation. For someone with your profile, here are targeted recommendations:\n\n1. Continue your prescribed Lisinopril (10mg daily)\n2. Maintain your low-sodium diet approach - this is excellent for managing hypertension\n3. Your current activity level (moderate with ~8,750 steps) is beneficial; aim for consistency with 30+ minutes of activity daily\n4. Consider incorporating stress management techniques like deep breathing or meditation\n5. Work on improving sleep quality, as your recent average of 6.5 hours is below optimal and can impact blood pressure";
+                source = "American Heart Association Guidelines, 2023; American College of Cardiology, 2024";
+            }
+            else if (userMessage.toLowerCase().includes('exercise') || userMessage.toLowerCase().includes('activity')) {
+                response = "Based on your profile showing moderate activity level and recent logs averaging 8,750 steps and 42 active minutes daily, you're doing well with physical activity.\n\nFor someone with mild hypertension, your current activity pattern is beneficial. Some personalized suggestions:\n\n1. Maintain your current step count while gradually working toward 10,000 steps\n2. Consider adding 2 days of strength training weekly, which has specific benefits for blood pressure management\n3. Your walking routine is excellent - adding brief intervals of increased pace can enhance cardiovascular benefits\n4. Monitor your blood pressure before and after exercise occasionally to understand your body's response";
+                source = "World Health Organization Physical Activity Guidelines, 2023; American Heart Association, 2023";
+            }
+            else {
+                response = "Based on your health profile with mild hypertension and seasonal allergies, I can provide personalized guidance on several aspects of your health:\n\n- Managing your blood pressure (currently 132/84)\n- Improving your sleep quality (currently averaging 6.5 hours)\n- Optimizing your exercise routine\n- Addressing seasonal allergies\n\nIs there a specific area you'd like me to focus on?";
+                source = "";
+            }
+            
+            // Add agent message
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message agent-message';
+            
+            const content = document.createElement('div');
+            content.textContent = response;
+            messageDiv.appendChild(content);
+            
+            if (source) {
+                const sourceInfo = document.createElement('div');
+                sourceInfo.className = 'source-info';
+                sourceInfo.textContent = `Source: ${source}`;
+                messageDiv.appendChild(sourceInfo);
+            }
+            
+            const time = document.createElement('div');
+            time.className = 'message-time';
+            const now = new Date();
+            time.textContent = `${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`;
+            messageDiv.appendChild(time);
+            
+            chatMessages.appendChild(messageDiv);
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }
         
@@ -1162,56 +1231,7 @@
             chatMessages.appendChild(messageDiv);
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }
-    });
+    })();
     </script>
 </body>
 </html>
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
-        
-        function generateResponse(userMessage) {
-            // Keyword-based responses
-            let response = '';
-            let source = '';
-            
-            if (userMessage.toLowerCase().includes('sleep') || userMessage.toLowerCase().includes('tired') || userMessage.toLowerCase().includes('fatigue')) {
-                response = "Looking at your sleep patterns, I see you've been averaging about 6.5 hours with 'fair' quality. For someone with mild hypertension, quality sleep is particularly important.\n\nSome personalized recommendations:\n1. Maintain a consistent sleep schedule (even on weekends)\n2. Consider taking your Lisinopril in the morning rather than evening, as it can sometimes affect sleep\n3. Your activity level is good (8,750 steps yesterday), but try to complete exercise at least 3-4 hours before bedtime\n4. Create a calming pre-sleep routine without screens\n5. Your low sodium dietary preference is excellent for hypertension and can also help reduce nighttime awakenings";
-                source = "National Sleep Foundation, 2024; American Heart Association, 2023";
-            }
-            else if (userMessage.toLowerCase().includes('blood pressure') || userMessage.toLowerCase().includes('hypertension')) {
-                response = "Your recent blood pressure reading of 132/84 shows mild elevation. For someone with your profile, here are targeted recommendations:\n\n1. Continue your prescribed Lisinopril (10mg daily)\n2. Maintain your low-sodium diet approach - this is excellent for managing hypertension\n3. Your current activity level (moderate with ~8,750 steps) is beneficial; aim for consistency with 30+ minutes of activity daily\n4. Consider incorporating stress management techniques like deep breathing or meditation\n5. Work on improving sleep quality, as your recent average of 6.5 hours is below optimal and can impact blood pressure";
-                source = "American Heart Association Guidelines, 2023; American College of Cardiology, 2024";
-            }
-            else if (userMessage.toLowerCase().includes('exercise') || userMessage.toLowerCase().includes('activity')) {
-                response = "Based on your profile showing moderate activity level and recent logs averaging 8,750 steps and 42 active minutes daily, you're doing well with physical activity.\n\nFor someone with mild hypertension, your current activity pattern is beneficial. Some personalized suggestions:\n\n1. Maintain your current step count while gradually working toward 10,000 steps\n2. Consider adding 2 days of strength training weekly, which has specific benefits for blood pressure management\n3. Your walking routine is excellent - adding brief intervals of increased pace can enhance cardiovascular benefits\n4. Monitor your blood pressure before and after exercise occasionally to understand your body's response";
-                source = "World Health Organization Physical Activity Guidelines, 2023; American Heart Association, 2023";
-            }
-            else {
-                response = "Based on your health profile with mild hypertension and seasonal allergies, I can provide personalized guidance on several aspects of your health:\n\n- Managing your blood pressure (currently 132/84)\n- Improving your sleep quality (currently averaging 6.5 hours)\n- Optimizing your exercise routine\n- Addressing seasonal allergies\n\nIs there a specific area you'd like me to focus on?";
-                source = "";
-            }
-            
-            // Add agent message
-            const messageDiv = document.createElement('div');
-            messageDiv.className = 'message agent-message';
-            
-            const content = document.createElement('div');
-            content.textContent = response;
-            messageDiv.appendChild(content);
-            
-            if (source) {
-                const sourceInfo = document.createElement('div');
-                sourceInfo.className = 'source-info';
-                sourceInfo.textContent = `Source: ${source}`;
-                messageDiv.appendChild(sourceInfo);
-            }
-            
-            const time = document.createElement('div');
-            time.className = 'message-time';
-            const now = new Date();
-            time.textContent = `${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`;
-            messageDiv.appendChild(time);
-            
-            chatMessages.appendChild(messageDiv);
-            
-            // Scroll to bottom
